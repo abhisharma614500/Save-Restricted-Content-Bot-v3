@@ -17,25 +17,22 @@ async def load_and_run_plugins():
         module = importlib.import_module(f"plugins.{plugin}")
         if hasattr(module, f"run_{plugin}_plugin"):
             print(f"Running {plugin} plugin...")
-            await getattr(module, f"run_{plugin}_plugin")()  
+            # यहाँ क्रैश से बचने के लिए टास्क के रूप में बैकग्राउंड में चलाया जा रहा है
+            asyncio.create_task(getattr(module, f"run_{plugin}_plugin")())  
 
 async def main():
+    print("Starting clients ...")
     await load_and_run_plugins()
+    # बॉट को हमेशा चालू रखने के लिए अनंत लूप
     while True:
-        await asyncio.sleep(1)  
+        await asyncio.sleep(3600)  
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    print("Starting clients ...")
     try:
-        loop.run_until_complete(main())
+        # आधुनिक और सुरक्षित तरीका जो लूप को अचानक बंद नहीं होने देता
+        asyncio.run(main())
     except KeyboardInterrupt:
         print("Shutting down...")
     except Exception as e:
-        print(e)
+        print(f"Error occurred: {e}")
         sys.exit(1)
-    finally:
-        try:
-            loop.close()
-        except Exception:
-            pass
