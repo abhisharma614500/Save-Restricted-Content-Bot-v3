@@ -1,4 +1,4 @@
-# Copyright (c) 2025 devgagan : https://github.com/devgaganin.  
+# Copyright (c) 2025 devgagan : https://github.com.  
 # Licensed under the GNU General Public License v3.0.  
 # See LICENSE file in the repository root for full license text.
 
@@ -17,19 +17,23 @@ async def load_and_run_plugins():
         module = importlib.import_module(f"plugins.{plugin}")
         if hasattr(module, f"run_{plugin}_plugin"):
             print(f"Running {plugin} plugin...")
-            # यहाँ क्रैश से बचने के लिए टास्क के रूप में बैकग्राउंड में चलाया जा रहा है
+            # इसे बैकग्राउंड टास्क में सही तरीके से शुरू करना
             asyncio.create_task(getattr(module, f"run_{plugin}_plugin")())  
 
 async def main():
     print("Starting clients ...")
     await load_and_run_plugins()
-    # बॉट को हमेशा चालू रखने के लिए अनंत लूप
-    while True:
-        await asyncio.sleep(3600)  
+    print("Bot is now fully online and waiting for messages...")
+    
+    # गिटहब पर इवेंट लूप को एक्टिव रखने का सबसे सही तरीका
+    try:
+        while True:
+            await asyncio.sleep(3600)
+    except asyncio.CancelledError:
+        print("Bot loop stopped.")
 
 if __name__ == "__main__":
     try:
-        # आधुनिक और सुरक्षित तरीका जो लूप को अचानक बंद नहीं होने देता
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Shutting down...")
